@@ -10,6 +10,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "This project leverages the power of Python and PostgreSQL to deliver a more enjoyable experience "
             "than the classic game of Tic-Tac-Toe (XO).\n\n"
             "Are you ready to embark on this exciting gaming adventure? Let's play Duz!"
+            "\n(Please Excuse Me VANIA)"
         )
         await context.bot.send_message(
             chat_id=update.effective_chat.id, text=start_message

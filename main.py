@@ -18,20 +18,20 @@ class ChangeHandler(FileSystemEventHandler):
         self.process = subprocess.Popen([sys.executable, self.script_path])
 
     def on_modified(self, event):
-        if event.src_path == os.path.abspath(self.script_path):
-            print(f"{self.script_path} modified; restarting...")
+        if event.src_path.endswith(".py"):
+            print(f"{event.src_path} modified; restarting...")
             self.start_script()
 
 
 if __name__ == "__main__":
-    script_path = "apps/bot.py"
+    package_directory = "apps"
+
+    script_path = os.path.join(package_directory, "bot.py")
 
     event_handler = ChangeHandler(script_path)
     observer = Observer()
     observer.schedule(
-        event_handler,
-        path=os.path.dirname(os.path.abspath(script_path)),
-        recursive=False,
+        event_handler, path=os.path.abspath(package_directory), recursive=True
     )
     observer.start()
 
