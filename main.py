@@ -24,7 +24,7 @@ class ChangeHandler(FileSystemEventHandler):
 
 
 if __name__ == "__main__":
-    script_path = "app/bot.py"
+    script_path = "apps/bot.py"
 
     event_handler = ChangeHandler(script_path)
     observer = Observer()
