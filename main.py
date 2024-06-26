@@ -1,34 +1,43 @@
-import logging
-
-from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
-
-from dotenv import dotenv_values
-
-config = dotenv_values(".env")
+import os
+import sys
+import time
+import subprocess
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
 
 
-TOKEN = config.get("BOT_TOKEN")
+class ChangeHandler(FileSystemEventHandler):
+    def __init__(self, script_path):
+        self.script_path = script_path
+        self.process = None
+        self.start_script()
 
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
-)
+    def start_script(self):
+        if self.process:
+            self.process.terminate()
+        self.process = subprocess.Popen([sys.executable, self.script_path])
 
-
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.effective_chat is not None:
-        await context.bot.send_message(
-            chat_id=update.effective_chat.id, text="I'm a bot, please talk to me!"
-        )
+    def on_modified(self, event):
+        if event.src_path == os.path.abspath(self.script_path):
+            print(f"{self.script_path} modified; restarting...")
+            self.start_script()
 
 
 if __name__ == "__main__":
-    if TOKEN is None:
-        raise ValueError("bot token can not be none")
+    script_path = "app/bot.py"
 
-    application = ApplicationBuilder().token(TOKEN).build()
+    event_handler = ChangeHandler(script_path)
+    observer = Observer()
+    observer.schedule(
+        event_handler,
+        path=os.path.dirname(os.path.abspath(script_path)),
+        recursive=False,
+    )
+    observer.start()
 
-    start_handler = CommandHandler("start", start)
-    application.add_handler(start_handler)
-
-    application.run_polling()
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        observer.stop()
+    observer.join()

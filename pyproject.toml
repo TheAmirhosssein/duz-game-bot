@@ -10,6 +10,7 @@ readme = "README.md"
 python = "^3.12"
 python-telegram-bot = "^21.3"
 python-dotenv = "^1.0.1"
+watchdog = "^4.0.1"
 
 
 [build-system]
