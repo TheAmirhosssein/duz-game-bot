@@ -1,7 +1,16 @@
 services:
+  db:
+    image: postgres
+    volumes:
+      - data:/var/lib/postgresql/data/
+    env_file:
+      - .env
   bot:
     build:
       context: .
     volumes:
       - ./:/app
     command: ["poetry", "run", "python", "main.py"]
+  
+volumes:
+  data:
