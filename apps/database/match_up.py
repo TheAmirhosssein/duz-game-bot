@@ -41,3 +41,27 @@ async def create_match_up(user: User):
     new_match_up = MatchUp(user_id=user.id, status=StatusEnum.started.value)
     db.add(new_match_up)
     db.commit()
+
+
+async def open_request(user: User) -> bool:
+    db: Session = next(get_db())
+    open_match_ups = db.query(MatchUp).filter(
+        MatchUp.status == StatusEnum.started.value, MatchUp.user_id != user.id
+    )
+    return open_match_ups.count() != 0
+
+
+async def match_with_player(user: User) -> User:
+    db: Session = next(get_db())
+    open_match_up = (
+        db.query(MatchUp)
+        .filter(
+            MatchUp.status == StatusEnum.started.value,
+            MatchUp.user_id != user.id,
+        )
+        .first()
+    )
+    assert open_match_up is not None
+    open_match_up.responder = user
+    db.commit()
+    return open_match_up.user
