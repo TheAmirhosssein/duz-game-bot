@@ -1,7 +1,11 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from config import DATABASE_URL
+from dotenv import dotenv_values
+
+config = dotenv_values(".env")
+
+DATABASE_URL = config.get("DATABASE_URL")
 
 if DATABASE_URL is None:
     raise ValueError("DATABASE_URL can not be None")
