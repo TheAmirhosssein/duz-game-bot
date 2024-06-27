@@ -1,13 +1,9 @@
 import logging
 
-from dotenv import dotenv_values
-from telegram.ext import ApplicationBuilder, CommandHandler
-
+from config import TOKEN
+from database.engine import Base, engine
 from handlers import start
-
-config = dotenv_values(".env")
-
-TOKEN = config.get("BOT_TOKEN")
+from telegram.ext import ApplicationBuilder, CommandHandler
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
@@ -19,7 +15,7 @@ if __name__ == "__main__":
         raise ValueError("bot token can not be none")
 
     application = ApplicationBuilder().token(TOKEN).build()
-
+    Base.metadata.create_all(bind=engine)
     start_handler = CommandHandler("start", start.start)
     application.add_handler(start_handler)
 
