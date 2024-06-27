@@ -2,7 +2,7 @@ import logging
 
 from config import TOKEN
 from database.engine import Base, engine
-from handlers import start
+from bot import handlers
 from telegram.ext import ApplicationBuilder, CommandHandler
 
 logging.basicConfig(
@@ -16,7 +16,7 @@ if __name__ == "__main__":
 
     Base.metadata.create_all(bind=engine)
     application = ApplicationBuilder().token(TOKEN).build()
-    start_handler = CommandHandler("start", start.start)
+    start_handler = CommandHandler("start", handlers.start)
     application.add_handler(start_handler)
 
     application.run_polling()
