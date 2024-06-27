@@ -1,5 +1,4 @@
-from database.match_up import create_match_up
-from database.users import create_user, get_user
+from database import match_up, users
 from telegram import Update
 from telegram.ext import ContextTypes
 
@@ -11,9 +10,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             update.message is not None
             and (user_info := update.message.from_user) is not None
         ):
-            user = await get_user(str(user_info.id))
+            user = await users.get_user(str(user_info.id))
             if user is None:
-                await create_user(name=user_info.full_name, username=str(user_info.id))
+                await users.create_user(
+                    name=user_info.full_name, username=str(user_info.id)
+                )
 
             start_message = (
                 f"🎮 Welcome to Duz Dear {user_info.full_name}! 🎲\n\n"
@@ -28,17 +29,19 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
 
 
-async def match_up(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    print("na")
+async def match_up_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_chat is not None:
         if (
             update.message is not None
             and (user_info := update.message.from_user) is not None
         ):
-            user = await get_user(str(user_info.id))
+            user = await users.get_user(str(user_info.id))
             assert user is not None
-            await create_match_up(user)
-            message = "until 30 seconds later we will find you a match! 🎲\n\n"
+            if await match_up.can_request(user):
+                await match_up.create_match_up(user)
+                message = "until 30 seconds later we will find you a match! 🎲\n\n"
+            else:
+                message = "you already requested match"
             await context.bot.send_message(
                 chat_id=update.effective_chat.id, text=message
             )

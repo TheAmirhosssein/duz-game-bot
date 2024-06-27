@@ -26,6 +26,16 @@ class MatchUp(Base):
     responder = relationship("User", foreign_keys="MatchUp.responder_id")
 
 
+async def can_request(user: User):
+    db: Session = next(get_db())
+    match_up = (
+        db.query(MatchUp)
+        .filter(MatchUp.user_id == user.id, MatchUp.status == StatusEnum.started.value)
+        .first()
+    )
+    return match_up is None
+
+
 async def create_match_up(user: User):
     db: Session = next(get_db())
     new_match_up = MatchUp(user_id=user.id, status=StatusEnum.started.value)
