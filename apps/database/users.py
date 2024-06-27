@@ -1,6 +1,8 @@
+import datetime
+
 from database.engine import Base, get_db
+from sqlalchemy import Column, DateTime, Integer, Sequence, String
 from sqlalchemy.orm import Session
-from sqlalchemy import Column, Integer, Sequence, String
 
 
 class User(Base):
@@ -9,6 +11,7 @@ class User(Base):
     id = Column(Integer, Sequence("user_id_seq"), primary_key=True)
     name = Column(String(50))
     username = Column(String(50), unique=True)
+    joined_at = Column(DateTime(), default=datetime.datetime.now())
 
     def __repr__(self):
         return f"{self.username} = {self.name}"

@@ -14,8 +14,8 @@ if __name__ == "__main__":
     if TOKEN is None:
         raise ValueError("bot token can not be none")
 
-    application = ApplicationBuilder().token(TOKEN).build()
     Base.metadata.create_all(bind=engine)
+    application = ApplicationBuilder().token(TOKEN).build()
     start_handler = CommandHandler("start", start.start)
     application.add_handler(start_handler)
 
