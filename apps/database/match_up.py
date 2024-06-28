@@ -3,7 +3,7 @@ from enum import Enum
 
 from database.engine import Base, get_db
 from database.users import User
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, Sequence, String, or_
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, Sequence, String
 from sqlalchemy.orm import Session, relationship
 
 
@@ -26,13 +26,26 @@ class MatchUp(Base):
     responder = relationship("User", foreign_keys="MatchUp.responder_id")
 
 
-async def can_request(user: User) -> bool:
+async def has_open_request(user: User) -> bool:
     db: Session = next(get_db())
     match_up = (
         db.query(MatchUp)
         .filter(
-            or_(MatchUp.user == user, MatchUp.responder == user),
+            MatchUp.user == user,
             MatchUp.status == StatusEnum.started.value,
+        )
+        .first()
+    )
+    return match_up is None
+
+
+async def matched_with_someone(user: User) -> bool:
+    db: Session = next(get_db())
+    match_up = (
+        db.query(MatchUp)
+        .filter(
+            MatchUp.responder == user,
+            MatchUp.status == StatusEnum.accepted,
         )
         .first()
     )

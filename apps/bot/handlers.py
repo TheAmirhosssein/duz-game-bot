@@ -37,15 +37,18 @@ async def match_up_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ):
             user = await users.get_user(str(user_info.id))
             assert user is not None
-            if await match_up.can_request(user):
+            if await match_up.has_open_request(user):
+                message = "you already requested match"
+            elif await match_up.match_with_player(user):
+                message = f"you already matched with {user.name}"
+            else:
                 if await match_up.open_request(user):
                     player = await match_up.match_with_player(user)
                     message = f"you have matched with {player.name}🎲\n\n"
                 else:
                     await match_up.create_match_up(user)
                     message = "until 30 seconds later we will find you a match! 🎲\n\n"
-            else:
-                message = "you already requested match"
+
             await context.bot.send_message(
                 chat_id=update.effective_chat.id, text=message
             )
