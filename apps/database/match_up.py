@@ -8,9 +8,9 @@ from sqlalchemy.orm import Session, relationship
 
 
 class StatusEnum(Enum):
-    started: str = "ST"
-    failed: str = "FA"
-    accepted: str = "AC"
+    started = "ST"
+    failed = "FA"
+    accepted = "AC"
 
 
 class MatchUp(Base):
