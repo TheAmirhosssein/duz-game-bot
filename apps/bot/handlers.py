@@ -4,7 +4,6 @@ from telegram.ext import ContextTypes
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    print("na")
     if update.effective_chat is not None:
         if (
             update.message is not None
@@ -39,7 +38,7 @@ async def match_up_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             assert user is not None
             if await match_up.has_open_request(user):
                 message = "you already requested match"
-            elif await match_up.match_with_player(user):
+            elif await match_up.matched_with_someone(user):
                 message = f"you already matched with {user.name}"
             else:
                 if await match_up.open_request(user):

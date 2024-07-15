@@ -36,7 +36,7 @@ async def has_open_request(user: User) -> bool:
         )
         .first()
     )
-    return match_up is None
+    return match_up is not None
 
 
 async def matched_with_someone(user: User) -> bool:
@@ -45,11 +45,11 @@ async def matched_with_someone(user: User) -> bool:
         db.query(MatchUp)
         .filter(
             MatchUp.responder == user,
-            MatchUp.status == StatusEnum.accepted,
+            MatchUp.status == StatusEnum.accepted.value,
         )
         .first()
     )
-    return match_up is None
+    return match_up is not None
 
 
 async def create_match_up(user: User):
@@ -69,6 +69,7 @@ async def open_request(user: User) -> bool:
 
 async def match_with_player(user: User) -> User:
     db: Session = next(get_db())
+    user = db.merge(user)
     open_match_up = (
         db.query(MatchUp)
         .filter(
