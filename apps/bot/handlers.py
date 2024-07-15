@@ -1,6 +1,7 @@
 from database import match_up, users
 from telegram import Update
 from telegram.ext import ContextTypes
+from bot.utils import send_telegram_message
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -11,6 +12,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ):
             user = await users.get_user(str(user_info.id))
             if user is None:
+                assert context._chat_id is not None
                 await users.create_user(
                     name=user_info.full_name, username=str(user_info.id)
                 )
@@ -44,6 +46,10 @@ async def match_up_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 if await match_up.open_request(user):
                     player = await match_up.match_with_player(user)
                     message = f"you have matched with {player.name}🎲\n\n"
+                    await send_telegram_message(
+                        chat_id=str(player.username),
+                        message=f"you have matched with {user.name}🚀\n\n",
+                    )
                 else:
                     await match_up.create_match_up(user)
                     message = "until 30 seconds later we will find you a match! 🎲\n\n"
