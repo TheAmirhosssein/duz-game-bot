@@ -82,3 +82,16 @@ async def match_with_player(user: User) -> User:
     open_match_up.responder = user
     db.commit()
     return open_match_up.user
+
+
+async def get_open_match_up(user: User) -> MatchUp | None:
+    db: Session = next(get_db())
+    open_match_up = (
+        db.query(MatchUp)
+        .filter(
+            MatchUp.status == StatusEnum.started.value,
+            MatchUp.user_id != user.id,
+        )
+        .first()
+    )
+    return open_match_up
