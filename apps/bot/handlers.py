@@ -52,10 +52,8 @@ async def match_up_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     message = f"you have matched with {player.name}🎲\n\n"
                     match = await match_up.get_open_match_up(user)
                     assert GAME_LINK is not None and match is not None
-                    player_link = (
-                        f"{GAME_LINK}?playerId={player.id}&playerId={match.id}"
-                    )
-                    user_link = f"{GAME_LINK}?playerId={user.id}&playerId={match.id}"
+                    player_link = f"{GAME_LINK}?user_id={player.id}&game_id={match.id}"
+                    user_link = f"{GAME_LINK}?user_id={user.id}&game_id={match.id}"
                     await send_telegram_message(
                         chat_id=str(player.username),
                         message=f"you have matched with {user.name}🚀\n\n",
