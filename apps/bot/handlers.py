@@ -1,9 +1,9 @@
-from bot.utils import send_telegram_message
+from bot.utils import send_telegram_message, create_game_link
 from database import match_up, users
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, WebAppInfo
+from telegram import Update
 from telegram.ext import ContextTypes
 
-from apps.config import GAME_LINK
+from config import GAME_LINK
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -39,7 +39,7 @@ async def match_up_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             update.message is not None
             and (user_info := update.message.from_user) is not None
         ):
-            reply_markup = None
+            user_link = None
             user = await users.get_user(str(user_info.id))
             assert user is not None
             if await match_up.has_open_request(user):
@@ -50,20 +50,16 @@ async def match_up_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 if await match_up.open_request(user):
                     player = await match_up.match_with_player(user)
                     message = f"you have matched with {player.name}🎲\n\n"
-                    assert GAME_LINK is not None
-                    buttons = [
-                        [
-                            InlineKeyboardButton(
-                                "open the game",
-                                web_app=WebAppInfo(GAME_LINK),
-                            )
-                        ]
-                    ]
-                    reply_markup = InlineKeyboardMarkup(buttons)
+                    match = await match_up.get_open_match_up(user)
+                    assert GAME_LINK is not None and match is not None
+                    player_link = (
+                        f"{GAME_LINK}?playerId={player.id}&playerId={match.id}"
+                    )
+                    user_link = f"{GAME_LINK}?playerId={user.id}&playerId={match.id}"
                     await send_telegram_message(
                         chat_id=str(player.username),
                         message=f"you have matched with {user.name}🚀\n\n",
-                        reply_markup=reply_markup,
+                        reply_markup=await create_game_link(player_link),
                     )
                 else:
                     await match_up.create_match_up(user)
@@ -72,5 +68,5 @@ async def match_up_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await context.bot.send_message(
                 chat_id=update.effective_chat.id,
                 text=message,
-                reply_markup=reply_markup,
+                reply_markup=await create_game_link(user_link),
             )
